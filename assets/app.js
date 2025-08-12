@@ -66,18 +66,25 @@ function fmt(iso) {
 }
 
 /******************** TOAST ****************************/
-// Toast “aposta criada”
-  showToast({
-    title:"Aposta criada",
-    message:` ${market} ${pick.toUpperCase()} @ ${odd} • stake ${stake}`,
-    undo: () => { // desfazer se ainda der tempo
-      const cutoffMin = (CURRENT_ODDS?.cutoffMinutes ?? CUTOFF_MINUTES_DEFAULT);
-      if (leftMs(match.start, cutoffMin) <= 0) return;
-      setSaldo(getSaldo() + bet.stake);
-      setBets(getBets().filter(x => x.id !== bet.id));
-    },
-    duration: 5000
-  });
+function showToast(msg, undoCallback = null) {
+  let toast = document.createElement("div");
+  toast.className = "toast";
+  toast.innerHTML = `<span>${msg}</span>`;
+
+  if (undoCallback) {
+    let undoBtn = document.createElement("button");
+    undoBtn.textContent = "Cancelar";
+    undoBtn.onclick = () => {
+      undoCallback();
+      toast.remove();
+    };
+    toast.appendChild(undoBtn);
+  }
+
+  document.getElementById("toastContainer").appendChild(toast);
+  setTimeout(() => {
+    toast.remove();
+  }, 5000);
 }
 
 /******************* RENDER DE JOGOS ******************/
