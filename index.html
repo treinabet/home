@@ -6,11 +6,9 @@
   <title>TreinaBet — Pré‑jogo (fictício)</title>
   <link rel="stylesheet" href="./assets/styles.css">
 </head>
-<div id="toasts" class="toast-container"></div>
 <body>
   <header>
-      <div class="card" style="margin-bottom:12px">
-      <div class="wrap">
+    <div class="wrap">
       <div class="row">
         <div class="brand">TREINABET • PRÉ‑JOGO</div>
         <div id="leagueBadge" class="pill">—</div>
@@ -26,8 +24,12 @@
 
   <main>
     <div class="card" style="margin-bottom:12px">
-    <div class="wrap">
-      <div class="row">
+      <div class="row" style="justify-content:space-between">
+        <div class="muted">Arquivo de odds:</div>
+        <code id="oddsFile">./data/odds.json</code>
+      </div>
+      <div class="muted" style="margin-top:6px">Edite <code>assets/app.js</code> se for trocar os caminhos.</div>
+    </div>
 
     <div id="lista" class="grid"></div>
 
