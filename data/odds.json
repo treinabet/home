@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "league": "Série A",
+  "generatedAt": "2025-08-12T16:32:59.887627Z",
+  "cutoffMinutes": 2,
+  "matches": [
+    {
+      "id": "bahia-santos-2025-08-24-1600",
+      "provider": "betano",
+      "home": "Bahia",
+      "away": "Santos",
+      "start": "2025-08-24T16:00:00-03:00",
+      "status": "SCHEDULED",
+      "markets": {
+        "1X2": {
+          "home": 1.85,
+          "draw": 3.55,
+          "away": 4.65
+        }
+      }
+    },
+    {
+      "id": "fluminen-fortalez-2025-08-16-1600",
+      "provider": "betano",
+      "home": "Fluminense",
+      "away": "Fortaleza",
+      "start": "2025-08-16T16:00:00-03:00",
+      "status": "SCHEDULED",
+      "markets": {
+        "1X2": {
+          "home": 1.8,
+          "draw": 3.5,
+          "away": 5.0
+        }
+      }
+    }
+  ]
+}

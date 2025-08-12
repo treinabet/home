@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TreinaBet — Pré‑jogo (fictício)</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="row">
+        <div class="brand">TREINABET • PRÉ‑JOGO</div>
+        <div id="leagueBadge" class="pill">—</div>
+      </div>
+      <div class="row">
+        <div id="saldo" class="pill">Saldo: —</div>
+        <button id="btnSettle" class="btn">Verificar resultados</button>
+        <button id="btnReset" class="btn btn-danger">Zerar carteira</button>
+        <button id="btnNick" class="btn">Trocar nick</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="card" style="margin-bottom:12px">
+      <div class="row" style="justify-content:space-between">
+        <div class="muted">Arquivo de odds:</div>
+        <code id="oddsFile">./data/odds.json</code>
+      </div>
+      <div class="muted" style="margin-top:6px">Edite <code>assets/app.js</code> se for trocar os caminhos.</div>
+    </div>
+
+    <div id="lista" class="grid"></div>
+
+    <div class="card" style="margin-top:14px">
+      <strong>Suas apostas</strong>
+      <div id="hist" class="list"></div>
+    </div>
+  </main>
+
+  <!-- Modal de Nick -->
+  <div id="modalNick" class="backdrop">
+    <div class="modal">
+      <h3>Digite seu nick para começar</h3>
+      <div class="field">
+        <input id="nickInput" type="text" placeholder="Seu nick" maxlength="24" />
+        <button id="nickConfirm" class="btn btn-primary">Entrar</button>
+      </div>
+      <div class="muted" style="margin-top:6px">O nick fica em cookie; banca e apostas ficam no seu navegador.</div>
+    </div>
+  </div>
+
+  <script src="./assets/app.js"></script>
+</body>
+</html>
