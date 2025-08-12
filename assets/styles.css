@@ -2,6 +2,32 @@
   --bg:#0b0f17; --card:#121826; --muted:#8ea0b3; --text:#eef2f7;
   --primary:#00b37e; --primary-2:#0a2e25; --stroke:#1e2a3b; --danger:#e94b4b;
 }
+/* Toasts */
+.toast-container{
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; gap: 10px; z-index: 60; pointer-events: none;
+}
+.toast{
+  pointer-events: auto;
+  background: #0c1422; border: 1px solid var(--stroke); color: var(--text);
+  border-radius: 12px; padding: 12px 14px; min-width: 280px; max-width: 92vw;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35); display:flex; align-items:center; gap:10px;
+  animation: toast-in .2s ease-out forwards;
+}
+.toast .t-title{ font-weight: 700; margin-right: 6px; }
+.toast .t-msg{ opacity: .9; }
+.toast .t-action{ margin-left: auto; }
+.toast .btn-link{
+  background: transparent; border: none; color: var(--primary);
+  cursor: pointer; padding: 6px 8px; border-radius: 8px; font-weight: 600;
+}
+.toast .btn-link:hover{ text-decoration: underline; }
+.toast .t-close{
+  background: transparent; border: none; color: var(--muted); cursor: pointer; padding: 6px 8px;
+}
+@keyframes toast-in{ from{opacity:0; transform: translateY(8px);} to{opacity:1; transform: translateY(0);} }
+@keyframes toast-out{ to{opacity:0; transform: translateY(8px);} }
+
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Inter,Arial;background:linear-gradient(180deg,#0b0f17,#0a0f16);color:var(--text)}
