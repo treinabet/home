@@ -112,34 +112,47 @@ function cancelBet(betId){
 }
 
 // ******************** HISTÓRICO ************************ 
-function renderHist(){
+function renderHist() {
   const box = byId('hist');
   const a = getBets().slice().reverse();
-  if(!a.length){box.innerHTML='<span class="muted">Sem apostas ainda.</span>'; return;}
+  if (!a.length) {
+    box.innerHTML = '<span class="muted">Sem apostas ainda.</span>';
+    return;
+  }
   box.innerHTML = '';
-  for(const b of a){
-    const row = el('div','row');
-    const left = el('div','grow', `${b.desc} • ${b.market} ${b.pick.toUpperCase()} @ ${b.odd} • stake ${b.stake}`);
-    let tag;
-    if(b.status==='WON') tag=el('span','tag tag-won','WON');
-    else if(b.status==='LOST') tag=el('span','tag tag-lost','LOST');
-    else if(b.status==='VOID') tag=el('span','tag tag-void','VOID');
-    else if(b.status==='CANCELED') tag=el('span','tag tag-void','CANCELED');
-    else tag=el('span','tag tag-pending','PENDING');
 
-    const actions = el('div','btn-row');
-    if (canCancel(b)) {
-      const btnConfirm = el('button','btn-sm','Confirmar');
-      btnConfirm.onclick = () => confirmBet(b.id);
-      const btnCancel = el('button','btn-sm','Cancelar');
-      btnCancel.onclick = () => { if(confirm('Cancelar esta aposta e devolver o saldo?')) cancelBet(b.id); };
-      actions.append(btnConfirm, btnCancel);
+  for (const b of a) {
+    const row = el('div', 'row');
+    const left = el('div', 'grow', `${b.desc} • ${b.market} ${b.pick.toUpperCase()} @ ${b.odd} • stake ${b.stake}`);
+    let tag;
+
+    if (b.status === 'WON') tag = el('span', 'tag tag-won', 'WON');
+    else if (b.status === 'LOST') tag = el('span', 'tag tag-lost', 'LOST');
+    else if (b.status === 'VOID') tag = el('span', 'tag tag-void', 'VOID');
+    else {
+      tag = el('span', 'tag tag-pending', 'PENDING');
+
+      // Se o jogo ainda não começou e não passou o cutoff → botão Cancelar
+      const match = CURRENT_ODDS.matches.find(m => m.id === b.eventId);
+      if (match && leftMs(match.start, CURRENT_ODDS.cutoffMinutes ?? CUTOFF_MINUTES_DEFAULT) > 0) {
+        const cancelBtn = el('button', 'btn btn-danger', 'Cancelar');
+        cancelBtn.style.marginLeft = '8px';
+        cancelBtn.onclick = () => {
+          if (confirm('Cancelar esta aposta e devolver saldo?')) {
+            setSaldo(getSaldo() + b.stake);
+            b.status = 'CANCELLED';
+            setBets(getBets().map(bb => bb.id === b.id ? b : bb));
+          }
+        };
+        row.append(cancelBtn);
+      }
     }
 
-    row.append(left, tag, actions);
+    row.append(left, tag);
     box.appendChild(row);
   }
 }
+
 
 // ********************* LIQUIDAÇÃO **********************
 async function liquidar(){
