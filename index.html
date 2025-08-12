@@ -71,7 +71,7 @@
     <div class="card" style="margin-bottom:12px">
       <div class="row" style="justify-content:space-between">
         <div class="muted">Arquivo de odds:</div>
-        <code id="oddsFile">odds.json</code>
+        <code id="oddsFile">/odds.json</code>
       </div>
       <div class="muted" style="margin-top:6px">Altere <code>DATA_ODDS_URL</code> e <code>DATA_RESULTS_URL</code> no script deste HTML.</div>
     </div>
@@ -98,7 +98,7 @@
 
 <script>
 /*********************** CONFIG ***********************/
-const DATA_ODDS_URL = "/data/odds-EXEMPLO.json";       // <— aponte para seu arquivo
+const DATA_ODDS_URL = "odds.json";       // <— aponte para seu arquivo
 const DATA_RESULTS_URL = "/data/results-EXEMPLO.json"; // <— mesmo arquivo a semana toda
 const CUTOFF_MINUTES_DEFAULT = 2;                       // buffer pré-jogo
 /********************* COOKIES/NICK ********************/
@@ -236,3 +236,4 @@ ensureNick();
 </script>
 </body>
 </html>
+
