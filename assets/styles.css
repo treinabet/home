@@ -60,7 +60,7 @@ input[type=number]{
 .odds{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px }
 .odd{
   padding:10px 12px; border-radius:12px;
-  border:1px solid var(--stroke); background:#0c1422; cursor:pointer;
+  border:1px solid var(--stroke); background:#0c1422; cursor:pointer; color:#0af;
 }
 .odd[disabled]{ opacity:.5; cursor:not-allowed }
 .timer{ margin-top:8px; font-size:.9rem }
