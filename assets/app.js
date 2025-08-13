@@ -1,9 +1,9 @@
-// *********************** CONFIG ************************
-const DATA_ODDS_URL = "./data/odds.json";       // odds da semana
-const DATA_RESULTS_URL = "./data/results.json"; // mesmo arquivo a semana toda
-const CUTOFF_MINUTES_DEFAULT = 2;               // buffer pré-jogo
+/*********************** CONFIG ***********************/
+const DATA_ODDS_URL = "./data/odds.json";     // ajuste se necessário
+const DATA_RESULTS_URL = "./data/results.json";
+const CUTOFF_MINUTES_DEFAULT = 2;
 
-// ********************* COOKIES/NICK ********************
+/********************* COOKIES/NICK ********************/
 function setCookie(name, value, days=365){const d=new Date();d.setTime(d.getTime()+days*24*60*60*1e3);document.cookie=`${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/`;}
 function getCookie(name){const c=name+"=";return decodeURIComponent(document.cookie).split(";").map(s=>s.trim()).find(s=>s.startsWith(c))?.slice(c.length)||null;}
 let NICK = getCookie('tb_nick');
@@ -15,30 +15,46 @@ function renderSaldo(){document.getElementById('saldo').textContent = `Saldo: ${
 function getBets(){try{return JSON.parse(localStorage.getItem(keyApostas())||'[]')}catch{return []}}
 function setBets(a){localStorage.setItem(keyApostas(), JSON.stringify(a)); renderHist();}
 
-// ********************* UTILITÁRIOS *********************
+/********************* UTILITÁRIOS *********************/
 const byId = id => document.getElementById(id);
 const el = (tag,cls,txt) => {const e=document.createElement(tag); if(cls) e.className=cls; if(txt) e.textContent=txt; return e;}
 const norm = s => (s||'').replace(/\s+/g,' ').trim();
 function leftMs(startIso, cutoff){return new Date(startIso).getTime() - Date.now() - cutoff*60*1000;}
 function fmt(iso){const d=new Date(iso);return d.toLocaleString('pt-BR',{dateStyle:'short', timeStyle:'short'});}
 
-function findMatchById(id){ return (CURRENT_ODDS?.matches || []).find(m => m.id === id) || null; }
-function canCancel(bet){
-  const match = findMatchById(bet.eventId);
-  if(!match) return false;
-  const cutoffMin = (CURRENT_ODDS?.cutoffMinutes ?? CUTOFF_MINUTES_DEFAULT);
-  return leftMs(match.start, cutoffMin) > 0 && bet.status === 'PENDING';
+/******************** TOAST ****************************/
+function showToast({ title="Aposta criada", message="", undo=null, duration=5000 } = {}){
+  const box = byId('toastContainer');
+  const t = document.createElement('div'); t.className = 'toast';
+  const ttl = document.createElement('span'); ttl.className='title'; ttl.textContent = title;
+  const msg = document.createElement('span'); msg.textContent = message;
+  const close = document.createElement('button'); close.className='close'; close.textContent='✕';
+  close.onclick = () => dismiss();
+  t.append(ttl, msg);
+  if(undo){
+    const btn = document.createElement('button'); btn.className='undo'; btn.textContent='Desfazer';
+    btn.onclick = () => { try{undo()}finally{dismiss()} };
+    t.append(btn);
+  }
+  t.append(close);
+  box.appendChild(t);
+  const timer = setTimeout(dismiss, duration);
+  function dismiss(){ clearTimeout(timer); t.remove(); }
 }
 
-// ******************* RENDER DE JOGOS ****************** 
+/******************* RENDER DE JOGOS ******************/ 
 let CURRENT_ODDS = null;
 async function loadOdds(){
   byId('lista').innerHTML = '<div class="muted">Carregando jogos…</div>';
-  try{const r=await fetch(DATA_ODDS_URL,{cache:'no-store'}); CURRENT_ODDS = await r.json();}
-  catch(e){byId('lista').innerHTML = '<div class="muted">Não consegui carregar o arquivo de odds.</div>'; return;}
-  byId('oddsFile').textContent = DATA_ODDS_URL; 
-  byId('leagueBadge').textContent = CURRENT_ODDS.league || 'Liga';
+  try{
+    const r=await fetch(DATA_ODDS_URL,{cache:'no-store'});
+    CURRENT_ODDS = await r.json();
+  }catch(e){
+    byId('lista').innerHTML = '<div class="muted">Não consegui carregar o arquivo de odds.</div>';
+    return;
+  }
 
+  byId('leagueBadge').textContent = CURRENT_ODDS.league || 'Liga';
   const cutoff = CURRENT_ODDS.cutoffMinutes ?? CUTOFF_MINUTES_DEFAULT;
   const list = byId('lista'); list.innerHTML = '';
 
@@ -79,39 +95,31 @@ async function loadOdds(){
 }
 
 function apostar(match, market, pick, odd, cutoff, btn){
-  if(leftMs(match.start,cutoff) <= 0){alert('Apostas fechadas para este jogo.'); btn.disabled=true; return;}
+  if(leftMs(match.start,cutoff) <= 0){ btn.disabled=true; return; }
   const stakeEl = byId(`stake_${match.id}`); const stake = Math.max(1, Math.floor(Number(stakeEl?.value||10)));
-  const saldo = getSaldo(); if(stake>saldo){alert('Saldo insuficiente.'); return;}
+  const saldo = getSaldo(); if(stake>saldo){ showToast({title:'Saldo insuficiente', message:`Você tem ${saldo.toFixed(2)} créditos.`}); return; }
+
   setSaldo(saldo - stake);
   const bets = getBets();
-  bets.push({ id:`bet_${Date.now()}_${Math.random().toString(16).slice(2)}`, eventId: match.id, desc:`${match.home} x ${match.away}`, start: match.start, market, pick, odd, stake, status:'PENDING', retorno:null });
+  const bet = { id:`bet_${Date.now()}_${Math.random().toString(16).slice(2)}`, eventId: match.id, desc:`${match.home} x ${match.away}`, start: match.start, market, pick, odd, stake, status:'PENDING', retorno:null };
+  bets.push(bet);
   setBets(bets);
-  alert('Aposta criada!');
+
+  // Toast “aposta criada”
+  showToast({
+    title:"Aposta criada",
+    message:` ${market} ${pick.toUpperCase()} @ ${odd} • stake ${stake}`,
+    undo: () => { // desfazer se ainda der tempo (antes do cutoff)
+      const cutoffMin = (CURRENT_ODDS?.cutoffMinutes ?? CUTOFF_MINUTES_DEFAULT);
+      if (leftMs(match.start, cutoffMin) <= 0) return;
+      setSaldo(getSaldo() + bet.stake);
+      setBets(getBets().filter(x => x.id !== bet.id));
+    },
+    duration: 5000
+  });
 }
 
-// **************** AÇÕES: CONFIRMAR / CANCELAR ****************
-function confirmBet(betId){
-  const bets = getBets();
-  const bet = bets.find(b => b.id === betId);
-  if(!bet) return;
-  if(bet.status !== 'PENDING') { alert('Aposta já processada.'); return; }
-  // Mantemos como PENDING; é apenas um reconhecimento visual.
-  setBets(bets);
-  alert('Aposta confirmada!');
-}
-function cancelBet(betId){
-  const bets = getBets();
-  const bet = bets.find(b => b.id === betId);
-  if(!bet) return;
-  if(!canCancel(bet)) { alert('Não é possível cancelar: cutoff atingido ou aposta já processada.'); return; }
-  // devolve stake e marca como cancelada
-  setSaldo(getSaldo() + Number(bet.stake));
-  bet.status = 'CANCELED';
-  bet.retorno = bet.stake;
-  setBets(bets);
-}
-
-// ******************** HISTÓRICO ************************ 
+/******************** HISTÓRICO ************************/ 
 function renderHist(){
   const box = byId('hist');
   const a = getBets().slice().reverse();
@@ -124,26 +132,35 @@ function renderHist(){
     if(b.status==='WON') tag=el('span','tag tag-won','WON');
     else if(b.status==='LOST') tag=el('span','tag tag-lost','LOST');
     else if(b.status==='VOID') tag=el('span','tag tag-void','VOID');
-    else if(b.status==='CANCELED') tag=el('span','tag tag-void','CANCELED');
     else tag=el('span','tag tag-pending','PENDING');
 
-    const actions = el('div','btn-row');
-    if (canCancel(b)) {
-      const btnConfirm = el('button','btn-sm','Confirmar');
-      btnConfirm.onclick = () => confirmBet(b.id);
+    // Cancelar antes do cutoff
+    const match = (CURRENT_ODDS?.matches||[]).find(m=>m.id===b.eventId);
+    if (match && leftMs(match.start, CURRENT_ODDS?.cutoffMinutes ?? CUTOFF_MINUTES_DEFAULT) > 0 && b.status==='PENDING') {
+      const actions = el('div','btn-row');
       const btnCancel = el('button','btn-sm','Cancelar');
-      btnCancel.onclick = () => { if(confirm('Cancelar esta aposta e devolver o saldo?')) cancelBet(b.id); };
-      actions.append(btnConfirm, btnCancel);
+      btnCancel.onclick = () => {
+        setSaldo(getSaldo() + b.stake);
+        setBets(getBets().filter(x => x.id !== b.id));
+        showToast({title:'Aposta cancelada', message:`${b.desc}`});
+      };
+      actions.append(btnCancel);
+      row.append(actions);
     }
 
-    row.append(left, tag, actions);
+    row.append(left, tag);
     box.appendChild(row);
   }
 }
 
-// ********************* LIQUIDAÇÃO **********************
+/********************* LIQUIDAÇÃO **********************/
 async function liquidar(){
-  let payload; try{const r=await fetch(DATA_RESULTS_URL,{cache:'no-store'}); if(!r.ok) return; payload=await r.json();}catch{return;}
+  let payload; 
+  try{
+    const r=await fetch(DATA_RESULTS_URL,{cache:'no-store'});
+    if(!r.ok) return;
+    payload=await r.json();
+  }catch{return;}
   const resMap = new Map((payload.results||[]).map(r=>[r.eventId, r]));
   const bets = getBets(); let saldo = getSaldo(); let mudou=false;
   for(const bet of bets){
@@ -158,10 +175,10 @@ async function liquidar(){
     else { bet.status='LOST'; bet.retorno=0; }
     mudou=true;
   }
-  if(mudou){ setSaldo(saldo); setBets(bets); alert('Apostas liquidadas!'); }
+  if(mudou){ setSaldo(saldo); setBets(bets); showToast({title:'Pronto', message:'Apostas liquidadas!'}); }
 }
 
-// ******************** NICK / MODAL *********************
+/******************** NICK / MODAL *********************/
 const modal = byId('modalNick');
 function ensureNick(){
   if(!NICK){ modal.style.display='flex'; byId('nickInput').focus(); }
@@ -170,9 +187,9 @@ function ensureNick(){
 byId('nickConfirm').addEventListener('click', ()=>{ const v=norm(byId('nickInput').value).slice(0,24); if(!v) return; NICK=v; setCookie('tb_nick', v); modal.style.display='none'; if(localStorage.getItem(keySaldo())==null) setSaldo(1000); renderSaldo(); renderHist(); loadOdds();});
 byId('btnNick').addEventListener('click', ()=>{ modal.style.display='flex'; byId('nickInput').value=''; byId('nickInput').focus(); });
 
-// ********************* BOTOES TOP **********************
+/********************* BOTOES TOP **********************/
 byId('btnSettle').addEventListener('click', liquidar);
-byId('btnReset').addEventListener('click', ()=>{ if(confirm('Zerar sua carteira e apostas?')){ setSaldo(1000); setBets([]); }});
+byId('btnReset').addEventListener('click', ()=>{ if(confirm('Zerar sua carteira e apostas?')){ setSaldo(1000); setBets([]); showToast({title:'Pronto', message:'Carteira zerada.'}); }});
 
-// ************************ INIT *************************
+/*********************** INIT **************************/
 ensureNick();
