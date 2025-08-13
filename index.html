@@ -3,14 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TreinaBet — Pré‑jogo (fictício)</title>
-  <link rel="stylesheet" href="./assets/styles.css">
+  <title>TreinaBet — Pré-jogo (fictício)</title>
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
+
+  <!-- Toasts -->
+  <div id="toastContainer"></div>
+
   <header>
     <div class="wrap">
       <div class="row">
-        <div class="brand">TREINABET • PRÉ‑JOGO</div>
+        <div class="brand">TREINABET • PRÉ-JOGO</div>
         <div id="leagueBadge" class="pill">—</div>
       </div>
       <div class="row">
@@ -23,14 +27,7 @@
   </header>
 
   <main>
-    <div class="card" style="margin-bottom:12px">
-      <div class="row" style="justify-content:space-between">
-        <div class="muted"></div>
-        <code id="oddsFile"></code>
-      </div>
-      <div class="muted" style="margin-top:6px"></div>
-    </div>
-
+    <!-- (removido o card com “Arquivo de odds…”) -->
     <div id="lista" class="grid"></div>
 
     <div class="card" style="margin-top:14px">
@@ -51,6 +48,6 @@
     </div>
   </div>
 
-  <script src="./assets/app.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
