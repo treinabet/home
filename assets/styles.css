@@ -60,7 +60,7 @@ input[type=number]{
 .odds{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px }
 .odd{
   padding:10px 12px; border-radius:12px;
-  border:1px solid var(--stroke); background:#0c1422; cursor:pointer; color:#0af;
+  border:1px solid var(--stroke); background:#0c1422; cursor:pointer;
 }
 .odd[disabled]{ opacity:.5; cursor:not-allowed }
 .timer{ margin-top:8px; font-size:.9rem }
@@ -117,11 +117,17 @@ input[type=number]{
   box-shadow: 0 10px 30px rgba(0,0,0,.35);
   animation: fadeIn .25s ease-out;
 }
-.toast button{
-  background: #ff4444; color: white; border: none;
+.toast .title{font-weight:700; margin-right:6px}
+.toast .undo{
+  background: #00b37e; color: #07261f; border: none;
   padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 13px;
 }
-.toast button:hover{ background:#cc0000 }
+.toast .undo:hover{ filter: brightness(1.05) }
+.toast .close{
+  background:transparent; border:none; color:var(--muted); cursor:pointer;
+  padding: 4px 6px; border-radius:6px;
+}
+.toast .close:hover{ color:#c9d3df }
 
 @keyframes fadeIn{
   from{ opacity:0; transform: translateY(-8px) }
